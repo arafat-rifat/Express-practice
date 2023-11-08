@@ -1,38 +1,41 @@
-// For Testing Pourpose// const fs = require('fs');
 const Tour = require('./../Models/tourModels');
-
-// No longer Need now... Only for testing purposees/////
-// const tours = JSON.parse(
-//   fs.readFileSync(`${__dirname}/../dev-data/data/tours-simple.json`)
-// );
-
-// Checking id using param for testing pourpose///
-// exports.checkId = (req, res, next, val) => {
-//   if (req.params.id * 1 > tours.length) {
-//     return res.status(404).json({
-//       status: 'fail',
-//       message: 'Invalid ID',
-//     });
-//   }
-//   next();
-// };
-
-// Checking id using param for testing pourpose///
-// exports.checkBody = (req, res, next) => {
-//   if (!req.body.name || !req.body.price) {
-//     return res.status(400).json({
-//       status: 'failed',
-//       message: 'missing name or price',
-//     });
-//   }
-//   next();
-// };
 
 // ROUTE HANDALER for Tours
 exports.getAllTours = async (req, res) => {
   try {
-    const tour = await Tour.find();
-    // console.log(req.requestTime);
+    // BUILD QUERY
+    //  1)Filtering
+    const queryObj = { ...req.query };
+    const excludedFields = ['page', 'sort', 'limit', 'fields'];
+    excludedFields.forEach((el) => delete queryObj[el]);
+
+    console.log(req.query, queryObj);
+
+    // 1-B) Advance Filtering
+    let queryStr = JSON.stringify(queryObj);
+    queryStr = queryStr.replace(/\b(gte|gt|lte|lt)\b/g, (match) => `$${match}`);
+
+    // Mongoosh version comment it as a reference
+    // const query =  Tour.find()
+    //   .where('duration')
+    //   .lte(5)
+    //   .where('difficulty')
+    //   .equals('easy');
+
+    let query = Tour.find(JSON.parse(queryStr));
+
+    // 2)Short
+
+    if (req.query.sort) {
+      const sortBy = req.query.sort.split(',').join(' ');
+      console.log(sortBy);
+      query = query.sort(sortBy);
+    }
+
+    // Exicuite query
+    const tour = await query;
+
+    // Send Response
     res.status(200).json({
       status: 'success',
       Time: req.requestTime,
@@ -42,7 +45,7 @@ exports.getAllTours = async (req, res) => {
       },
     });
   } catch (err) {
-    res.status(400).json({
+    res.status(404).json({
       status: 'Failed',
       message: err,
     });
@@ -82,20 +85,6 @@ exports.getTour = async (req, res) => {
       message: 'Invalid ID',
     });
   }
-
-  // const tour = tours.find((el) => el.id === id);
-  // if (!tour) {
-  //   return res.status(404).json({
-  //     status: 'fail',
-  //     message: 'Invalid ID',
-  //   });
-  // }
-  // res.status(200).json({
-  //   status: 'Success',
-  //   // data: {
-  //   //   tour,
-  //   // },
-  // });
 };
 
 exports.updateTour = async (req, res) => {

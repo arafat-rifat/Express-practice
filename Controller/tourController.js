@@ -16,11 +16,11 @@ class APIFeatures {
   }
 
   filter() {
-    const queryObj = { ...this.query };
+    const queryObj = { ...this.queryString };
     const excludedFields = ['page', 'sort', 'limit', 'fields'];
     excludedFields.forEach((el) => delete queryObj[el]);
 
-    console.log(this.req.query, queryObj);
+    console.log(this.query, queryObj);
 
     // 1-B) Advance Filtering
     let queryStr = JSON.stringify(queryObj);
@@ -69,56 +69,6 @@ class APIFeatures {
 // ROUTE HANDALER for Tours
 exports.getAllTours = async (req, res) => {
   try {
-    // BUILD QUERY
-    //  1)Filtering
-    // const queryObj = { ...req.query };
-    // const excludedFields = ['page', 'sort', 'limit', 'fields'];
-    // excludedFields.forEach((el) => delete queryObj[el]);
-
-    // console.log(req.query, queryObj);
-
-    // // 1-B) Advance Filtering
-    // let queryStr = JSON.stringify(queryObj);
-    // queryStr = queryStr.replace(/\b(gte|gt|lte|lt)\b/g, (match) => `$${match}`);
-
-    // // Mongoosh version comment it as a reference
-    // // const query =  Tour.find()
-    // //   .where('duration')
-    // //   .lte(5)
-    // //   .where('difficulty')
-    // //   .equals('easy');
-
-    // let query = Tour.find(JSON.parse(queryStr));
-
-    // // 2)Short
-
-    // if (req.query.sort) {
-    //   const sortBy = req.query.sort.split(',').join(' ');
-    //   console.log(sortBy);
-    //   query = query.sort(sortBy);
-    // } else {
-    //   query = query.sort('-createdAt');
-    // }
-
-    // //3)Field limiting
-    // if (req.query.fields) {
-    //   const fields = req.query.fields.split(',').join(' ');
-    //   query = query.select(fields);
-    // } else {
-    //   query = query.select('-__v');
-    // }
-
-    // // 4) Pagination
-    // const page = req.query.page * 1 || 1;
-    // const limit = req.query.limit * 1 || 100;
-    // const skip = (page - 1) * limit;
-
-    // query = query.skip(skip).limit(limit);
-
-    // if (req.query.page) {
-    //   const numTours = await Tour.countDocuments();
-    //   if (skip >= numTours) throw new Error('This page not Exist');
-    // }
     // Exicuite query
     const features = new APIFeatures(Tour.find(), req.query)
       .filter()
